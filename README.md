@@ -1,4 +1,4 @@
-# codebase-digest
+# codebase-digest-ai
 
 🚀 **AI-Native Code Intelligence Engine**
 
@@ -26,22 +26,22 @@ This is NOT a repo summarizer. This is a code intelligence engine that explains:
 
 ```bash
 # Install
-pip install codebase-digest
+pip install codebase-digest-ai
 
 # Analyze current directory
-codebase-digest build
+codebase-digest-ai build
 
 # Analyze specific directory  
-codebase-digest build /path/to/project
+codebase-digest-ai build /path/to/project
 
 # Generate with interactive call graph
-codebase-digest build --graph
+codebase-digest-ai build --graph
 
 # Quick stats
-codebase-digest stats
+codebase-digest-ai stats
 
 # Search for patterns
-codebase-digest query "wallet"
+codebase-digest-ai query "wallet"
 ```
 
 ## 📁 Output Structure
@@ -99,19 +99,19 @@ The application follows a layered architecture with clear separation of concerns
 
 ```bash
 # Full analysis with all outputs
-codebase-digest build [PATH]
+codebase-digest-ai build [PATH]
 
 # Specific formats
-codebase-digest build --format html       # HTML dashboard only
-codebase-digest build --format markdown   # Markdown reports only  
-codebase-digest build --format json       # JSON data only
+codebase-digest-ai build --format html       # HTML dashboard only
+codebase-digest-ai build --format markdown   # Markdown reports only  
+codebase-digest-ai build --format json       # JSON data only
 
 # Interactive call graph with depth filtering
-codebase-digest build --graph --graph-depth 3
+codebase-digest-ai build --graph --graph-depth 3
 
 # Quick metrics and search
-codebase-digest stats [PATH]              # Project statistics
-codebase-digest query "search term" [PATH] # Search patterns
+codebase-digest-ai stats [PATH]              # Project statistics
+codebase-digest-ai query "search term" [PATH] # Search patterns
 ```
 
 ## 🎯 Key Features
