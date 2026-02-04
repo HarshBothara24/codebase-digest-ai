@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codebase-digest-ai"
+version = "0.1.1"
+description = "AI-native code intelligence engine for semantic codebase analysis"
+authors = [{ name = "Harsh Bothara" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10"
+
+keywords = [
+    "code-analysis",
+    "ast",
+    "static-analysis",
+    "documentation",
+    "ai",
+    "developer-tools"
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+dependencies = [
+    "typer>=0.9.0",
+    "networkx>=3.0",
+    "rich>=13.0.0",
+    "jinja2>=3.1.0",
+    "pathspec>=0.11.0",
+    "pyvis>=0.3.2"
+]
+
+[project.urls]
+Homepage = "https://github.com/codebase-digest/codebase-digest"
+Documentation = "https://github.com/codebase-digest/codebase-digest#readme"
+Repository = "https://github.com/codebase-digest/codebase-digest"
+Issues = "https://github.com/codebase-digest/codebase-digest/issues"
+
+[project.scripts]
+codebase-digest-ai = "codebase_digest.cli.main:app"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+    "build>=0.10.0",
+    "twine>=4.0.0"
+]
+
+# REQUIRED FOR INCLUDING HTML / JINJA / MARKDOWN FILES
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["codebase_digest*"]
+exclude = ["tests*", "example_project*", "lib*"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

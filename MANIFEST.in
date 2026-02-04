@@ -1,0 +1,25 @@
+include README.md
+include LICENSE
+include pyproject.toml
+
+# Python source
+recursive-include codebase_digest *.py
+
+# Templates + report assets (CRITICAL)
+recursive-include codebase_digest *.html
+recursive-include codebase_digest *.md
+recursive-include codebase_digest *.j2
+recursive-include codebase_digest *.json
+
+# Cleanup
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
+exclude .gitignore
+exclude install.py
+
+prune example_project
+prune lib
+prune .digest
+prune .vscode
+prune tests
