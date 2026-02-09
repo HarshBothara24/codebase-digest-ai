@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codebase-digest-ai"
-version = "0.1.1"
+version = "0.1.3"
 description = "AI-native code intelligence engine for semantic codebase analysis"
 authors = [{ name = "Harsh Bothara" }]
 license = { text = "MIT" }

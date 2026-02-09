@@ -344,8 +344,8 @@ class GraphExporter:
                 })
                 edge_count += 1
         
-        # Calculate real component count
-        components = nx.number_weakly_connected_components(self.graph)
+        # Calculate real component count (handle empty graph)
+        components = nx.number_weakly_connected_components(self.graph) if len(self.graph.nodes) > 0 else 0
         
         # If no edges, create a simple layout with isolated nodes
         if edge_count == 0:
@@ -967,12 +967,22 @@ class GraphExporter:
     
     def get_graph_stats(self) -> Dict[str, Any]:
         """Get statistics about the call graph."""
+        # Handle empty graph case
+        if len(self.graph.nodes) == 0:
+            return {
+                'nodes': 0,
+                'edges': 0,
+                'density': 0.0,
+                'is_connected': False,
+                'components': 0
+            }
+        
         return {
             'nodes': len(self.graph.nodes),
             'edges': len(self.graph.edges),
-            'density': nx.density(self.graph),
-            'is_connected': nx.is_weakly_connected(self.graph),
-            'components': nx.number_weakly_connected_components(self.graph)
+            'density': nx.density(self.graph) if len(self.graph.edges) > 0 else 0.0,
+            'is_connected': nx.is_weakly_connected(self.graph) if len(self.graph.nodes) > 0 else False,
+            'components': nx.number_weakly_connected_components(self.graph) if len(self.graph.nodes) > 0 else 0
         }
     
     def _create_fallback_html(self, output_path: Path, node_count: int, edge_count: int) -> None:

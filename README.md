@@ -26,22 +26,25 @@ This is NOT a repo summarizer. This is a code intelligence engine that explains:
 
 ```bash
 # Install
-pip install codebase-digest-ai
+pip install codebase-digest
 
 # Analyze current directory
-codebase-digest-ai build
+codebase-digest build
 
 # Analyze specific directory  
-codebase-digest-ai build /path/to/project
+codebase-digest build /path/to/project
 
 # Generate with interactive call graph
-codebase-digest-ai build --graph
+codebase-digest build --graph
+
+# Limit graph depth for large projects
+codebase-digest build --graph --graph-depth 3
 
 # Quick stats
-codebase-digest-ai stats
+codebase-digest stats
 
 # Search for patterns
-codebase-digest-ai query "wallet"
+codebase-digest query "wallet"
 ```
 
 ## 📁 Output Structure
@@ -99,19 +102,26 @@ The application follows a layered architecture with clear separation of concerns
 
 ```bash
 # Full analysis with all outputs
-codebase-digest-ai build [PATH]
+codebase-digest build [PATH]
 
 # Specific formats
-codebase-digest-ai build --format html       # HTML dashboard only
-codebase-digest-ai build --format markdown   # Markdown reports only  
-codebase-digest-ai build --format json       # JSON data only
+codebase-digest build --format html       # HTML dashboard only
+codebase-digest build --format markdown   # Markdown reports only  
+codebase-digest build --format json       # JSON data only
 
 # Interactive call graph with depth filtering
-codebase-digest-ai build --graph --graph-depth 3
+codebase-digest build --graph --graph-depth 3
+
+# Production-level README (AI-powered by default, requires GEMINI_API_KEY)
+export GEMINI_API_KEY="your-api-key"
+codebase-digest build
+
+# Use template-based README (no AI)
+codebase-digest build --no-ai
 
 # Quick metrics and search
-codebase-digest-ai stats [PATH]              # Project statistics
-codebase-digest-ai query "search term" [PATH] # Search patterns
+codebase-digest stats [PATH]              # Project statistics
+codebase-digest query "search term" [PATH] # Search patterns
 ```
 
 ## 🎯 Key Features
@@ -123,10 +133,12 @@ codebase-digest-ai query "search term" [PATH] # Search patterns
 - **Professional UI** - GitHub/Linear/Notion inspired design
 
 ### 📝 Smart README Generation  
-- **Project type inference** - Detects financial, e-commerce, CMS patterns
-- **Architecture analysis** - Service-oriented vs modular detection
-- **Run instructions** - Inferred from entry points
-- **Future improvements** - Realistic enhancement suggestions
+- **Production-level documentation** - GitHub-quality READMEs with comprehensive sections
+- **Intelligent analysis** - Detects project type from actual code and imports
+- **Framework-aware** - Identifies Flask, Django, FastAPI, PyTorch, scikit-learn, pandas, etc.
+- **Comprehensive sections** - About, Features, Installation, Usage, Architecture, API Docs, Deployment, Contributing
+- **Accurate detection** - Uses real file names, classes, functions from analysis
+- **Professional formatting** - Badges, table of contents, code blocks, proper markdown
 
 ### 🔍 Semantic Understanding
 - **Symbol-aware analysis** - True function-level relationships
@@ -143,7 +155,7 @@ codebase-digest-ai query "search term" [PATH] # Search patterns
 - **Typer** - CLI interface
 - **Rich** - Beautiful terminal output
 
-## 📋 Supported Languages
+## � Supported Languageso
 
 - ✅ **Python** - Full AST analysis with call graphs
 - 🚧 **JavaScript/TypeScript** - Parser implemented, integration in progress

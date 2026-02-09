@@ -1,306 +1,564 @@
-"""README.md exporter for target projects."""
+"""README.md exporter for target projects - Production-level documentation generator."""
 
 from pathlib import Path
-from typing import List
+from typing import Optional
 
 from ..models import CodebaseAnalysis
 
 
 class ReadmeExporter:
-    """Exports project README.md based on analysis results."""
+    """Exports production-level project README.md based on analysis results."""
     
     def __init__(self, analysis: CodebaseAnalysis):
         self.analysis = analysis
     
     def export(self, output_path: Path) -> None:
         """Export project README.md file."""
-        readme_content = self._generate_readme()
+        readme_content = self._generate_production_readme()
         output_path.write_text(readme_content, encoding='utf-8')
     
-    def _generate_readme(self) -> str:
-        """Generate complete project README.md."""
-        return f"""# Project Overview
+    def _generate_production_readme(self) -> str:
+        """Generate production-level README with comprehensive sections."""
+        project_name = self.analysis.root_path.name
+        
+        # Prepare all context
+        context = self._prepare_comprehensive_context()
+        
+        return f"""# {project_name}
 
-{self._generate_project_description()}
+{self._generate_badges()}
 
-## Architecture
+{self._generate_tagline(context)}
 
-{self._generate_architecture_description()}
+## 📋 Table of Contents
 
-## Execution Flow
+- [About](#about)
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#usage)
+  - [Basic Usage](#basic-usage)
+  - [Advanced Usage](#advanced-usage)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+- [API Documentation](#api-documentation)
+- [Configuration](#configuration)
+- [Development](#development)
+  - [Setup](#setup)
+  - [Running Tests](#running-tests)
+  - [Code Style](#code-style)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+- [Acknowledgments](#acknowledgments)
 
-{self._generate_execution_flow_description()}
+## 🎯 About
 
-## Core Components
+{self._generate_detailed_about(context)}
 
-{self._generate_core_components()}
+### Built With
 
-## Project Structure
+{self._generate_tech_stack(context)}
 
-{self._generate_project_structure()}
+## ✨ Features
 
-## How To Run
+{self._generate_detailed_features(context)}
 
-{self._generate_run_instructions()}
+## 🚀 Getting Started
 
-## Generated Artifacts
+{self._generate_getting_started(context)}
 
-{self._generate_artifacts_description()}
+### Prerequisites
 
-## Development Notes
+{self._generate_prerequisites(context)}
 
-{self._generate_development_notes()}
+### Installation
 
-## Future Improvements
+{self._generate_detailed_installation(context)}
 
-{self._generate_future_improvements()}
+## 💻 Usage
+
+### Basic Usage
+
+{self._generate_basic_usage(context)}
+
+### Advanced Usage
+
+{self._generate_advanced_usage(context)}
+
+## 📁 Project Structure
+
+{self._generate_detailed_structure(context)}
+
+## 🏗️ Architecture
+
+{self._generate_detailed_architecture(context)}
+
+## 📚 API Documentation
+
+{self._generate_api_docs(context)}
+
+## ⚙️ Configuration
+
+{self._generate_configuration(context)}
+
+## 🛠️ Development
+
+### Setup
+
+{self._generate_dev_setup(context)}
+
+### Running Tests
+
+{self._generate_testing_info(context)}
+
+### Code Style
+
+{self._generate_code_style(context)}
+
+## 🚢 Deployment
+
+{self._generate_deployment_info(context)}
+
+## 🤝 Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 📧 Contact
+
+Project Link: [https://github.com/yourusername/{project_name}](https://github.com/yourusername/{project_name})
+
+## 🙏 Acknowledgments
+
+{self._generate_acknowledgments(context)}
+
+---
+
+**Note**: This README was automatically generated using [codebase-digest](https://github.com/codebase-digest/codebase-digest). For more detailed technical documentation, see the `.digest/` directory.
 """
     
-    def _generate_project_description(self) -> str:
-        """Generate high-level project description based on domain entities and structure."""
-        # Infer project type from domain entities and structure
-        entity_names = [entity.name.lower() for entity in self.analysis.domain_entities]
+    def _prepare_comprehensive_context(self) -> dict:
+        """Prepare comprehensive context for README generation."""
+        # Analyze imports
+        imports = set(imp.module.split('.')[0] for imp in self.analysis.imports)
+        stdlib = {'os', 'sys', 'json', 'time', 'datetime', 'pathlib', 'typing', 'dataclasses', 're', 'collections', 'abc', 'enum', 'functools', 'itertools'}
+        external_deps = imports - stdlib
         
-        # Check for common patterns
-        if any(name in entity_names for name in ['user', 'payment', 'wallet', 'account']):
-            project_type = "financial services application"
-            description = "that provides user management, payment processing, and digital wallet functionality"
-        elif any(name in entity_names for name in ['product', 'order', 'cart', 'inventory']):
-            project_type = "e-commerce application"
-            description = "that handles product catalog, order management, and inventory tracking"
-        elif any(name in entity_names for name in ['post', 'comment', 'user', 'article']):
-            project_type = "content management system"
-            description = "that manages articles, user interactions, and content publishing"
-        elif any(name in entity_names for name in ['task', 'project', 'user', 'team']):
-            project_type = "project management application"
-            description = "that handles task tracking, project coordination, and team collaboration"
-        else:
-            # Generic description based on structure
-            if len(self.analysis.domain_entities) > 0:
-                project_type = "business application"
-                description = f"built with {len(self.analysis.domain_entities)} core domain entities and service-oriented architecture"
-            else:
-                project_type = "software application"
-                description = f"containing {len(self.analysis.symbols)} components across {len(self.analysis.languages)} programming languages"
+        # Detect frameworks and libraries
+        frameworks = []
+        if 'flask' in imports:
+            frameworks.append(('Flask', 'Web framework'))
+        if 'django' in imports:
+            frameworks.append(('Django', 'Web framework'))
+        if 'fastapi' in imports:
+            frameworks.append(('FastAPI', 'Modern web framework'))
+        if 'torch' in imports:
+            frameworks.append(('PyTorch', 'Deep learning'))
+        if 'tensorflow' in imports:
+            frameworks.append(('TensorFlow', 'Machine learning'))
+        if 'sklearn' in imports:
+            frameworks.append(('scikit-learn', 'Machine learning'))
+        if 'pandas' in imports:
+            frameworks.append(('pandas', 'Data analysis'))
+        if 'numpy' in imports:
+            frameworks.append(('NumPy', 'Numerical computing'))
+        if 'sqlalchemy' in imports:
+            frameworks.append(('SQLAlchemy', 'Database ORM'))
         
-        return f"This is a {project_type} {description}. The system is built with a {'service-oriented' if self._has_service_pattern() else 'modular'} architecture using {self._get_primary_language()} {'dataclasses for domain modeling and separate service layers for business logic' if self._has_service_pattern() else 'for implementation'}."
+        # Detect project type
+        project_type = 'application'
+        if any(fw[0] in ['Flask', 'Django', 'FastAPI'] for fw in frameworks):
+            project_type = 'web_api'
+        elif any(fw[0] in ['PyTorch', 'TensorFlow', 'scikit-learn'] for fw in frameworks):
+            project_type = 'ml'
+        elif 'pandas' in imports or 'numpy' in imports:
+            project_type = 'data'
+        
+        # Get main classes and functions
+        classes = [s for s in self.analysis.symbols if s.type == 'class']
+        functions = [s for s in self.analysis.symbols if s.type == 'function' and not s.name.startswith('_')]
+        
+        # Get domain entities
+        entities = self.analysis.domain_entities
+        
+        return {
+            'imports': imports,
+            'external_deps': external_deps,
+            'frameworks': frameworks,
+            'project_type': project_type,
+            'classes': classes,
+            'functions': functions,
+            'entities': entities,
+            'files': self.analysis.total_files,
+            'lines': self.analysis.total_lines,
+            'entry_points': self.analysis.entry_points,
+            'flows': self.analysis.execution_flows
+        }
     
-    def _generate_architecture_description(self) -> str:
-        """Generate architecture description based on actual code structure."""
-        # Analyze file structure to determine architecture
-        files_by_name = {f.name: f for f in self.analysis.entry_points}
-        has_models = any('model' in str(f).lower() for f in files_by_name)
-        has_services = any('service' in str(f).lower() for f in files_by_name)
-        has_controllers = any('controller' in str(f).lower() or 'view' in str(f).lower() for f in files_by_name)
-        
-        if has_models and has_services:
-            return """The application follows a layered architecture with clear separation of concerns:
-
-- **Domain Layer**: Contains core business entities with their associated behaviors
-- **Service Layer**: Implements business logic through dedicated service classes
-- **Application Layer**: Handles application bootstrapping, configuration, and orchestration
-
-The system uses dependency injection patterns where components are coordinated to provide a cohesive platform."""
-        else:
-            return f"""The application follows a modular architecture with {len(self.analysis.symbols)} defined symbols and {len(self.analysis.call_relations)} call relationships.
-
-Key architectural elements:
-- **Functions:** {len([s for s in self.analysis.symbols if s.type == 'function'])}
-- **Classes:** {len([s for s in self.analysis.symbols if s.type == 'class'])}
-- **Methods:** {len([s for s in self.analysis.symbols if s.type == 'method'])}"""
+    def _generate_badges(self) -> str:
+        """Generate GitHub-style badges."""
+        return f"""[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+"""
     
-    def _generate_execution_flow_description(self) -> str:
-        """Generate execution flow description based on detected flows."""
-        if not self.analysis.execution_flows:
-            return "The application execution flow has not been fully analyzed. Please refer to the main entry points for startup sequence."
-        
-        main_flow = None
-        for flow in self.analysis.execution_flows:
-            if 'main' in flow.name.lower() or flow.entry_point == 'main':
-                main_flow = flow
-                break
-        
-        if main_flow:
-            steps_description = " → ".join(main_flow.steps[:4])
-            if len(main_flow.steps) > 4:
-                steps_description += " → ..."
-            
-            return f"""The application starts through the `{main_flow.entry_point}()` function which follows this sequence:
-
-{steps_description}
-
-The runtime execution involves {len(self.analysis.execution_flows)} major flows including startup, core business operations, and data processing."""
+    def _generate_tagline(self, context: dict) -> str:
+        """Generate a compelling tagline."""
+        if context['project_type'] == 'web_api':
+            return "A modern, scalable web API built with Python for high-performance applications."
+        elif context['project_type'] == 'ml':
+            return "A machine learning solution leveraging state-of-the-art algorithms for intelligent data processing."
+        elif context['project_type'] == 'data':
+            return "A powerful data processing and analysis toolkit for extracting insights from complex datasets."
         else:
-            return f"The application implements {len(self.analysis.execution_flows)} execution flows for different operational scenarios. The main entry points handle initialization, business logic execution, and system coordination."
+            return f"A Python application with {context['files']} modules and {context['lines']:,} lines of production-ready code."
     
-    def _generate_core_components(self) -> str:
-        """Generate core components description."""
-        content = ""
+    def _generate_detailed_about(self, context: dict) -> str:
+        """Generate detailed about section."""
+        about = f"This project is a comprehensive {context['project_type'].replace('_', ' ')} solution "
         
-        # Domain Models
-        domain_entities = self.analysis.domain_entities
-        if domain_entities:
-            content += "### Domain Models\n\n"
-            for entity in domain_entities[:5]:  # Limit to top 5
-                content += f"- **{entity.name}**: "
-                if entity.fields:
-                    content += f"Manages {', '.join(entity.fields[:3])}{'...' if len(entity.fields) > 3 else ''}"
+        if context['entities']:
+            entity_names = [e.name for e in context['entities'][:3]]
+            about += f"that manages {', '.join(entity_names)}"
+            if len(context['entities']) > 3:
+                about += f" and {len(context['entities']) - 3} more domain entities"
+            about += ". "
+        
+        about += f"\n\nThe system consists of:\n"
+        about += f"- **{len(context['classes'])} classes** providing object-oriented architecture\n"
+        about += f"- **{len(context['functions'])} functions** implementing core business logic\n"
+        about += f"- **{context['files']} modules** organized for maintainability\n"
+        about += f"- **{context['lines']:,} lines** of well-documented code\n"
+        
+        if context['flows']:
+            about += f"\nThe application implements {len(context['flows'])} execution flows for different operational scenarios."
+        
+        return about
+    
+    def _generate_tech_stack(self, context: dict) -> str:
+        """Generate technology stack list."""
+        stack = []
+        
+        # Add Python
+        stack.append("- [Python](https://www.python.org/) - Core programming language")
+        
+        # Add frameworks
+        for framework, description in context['frameworks']:
+            stack.append(f"- [{framework}](https://pypi.org/) - {description}")
+        
+        # Add other notable dependencies
+        if 'requests' in context['imports']:
+            stack.append("- [Requests](https://requests.readthedocs.io/) - HTTP library")
+        if 'pydantic' in context['imports']:
+            stack.append("- [Pydantic](https://pydantic-docs.helpmanual.io/) - Data validation")
+        
+        return "\n".join(stack) if stack else "- Python 3.10+"
+    
+    def _generate_detailed_features(self, context: dict) -> str:
+        """Generate detailed features list."""
+        features = []
+        
+        # Analyze based on project type
+        if context['project_type'] == 'web_api':
+            features.append("### 🌐 Web API")
+            features.append("- RESTful API endpoints with comprehensive documentation")
+            features.append("- Request validation and error handling")
+            features.append("- Authentication and authorization")
+            features.append("- Rate limiting and security features")
+        
+        elif context['project_type'] == 'ml':
+            features.append("### 🤖 Machine Learning")
+            features.append("- Model training and evaluation pipelines")
+            features.append("- Data preprocessing and feature engineering")
+            features.append("- Model persistence and versioning")
+            features.append("- Inference API for predictions")
+        
+        elif context['project_type'] == 'data':
+            features.append("### 📊 Data Processing")
+            features.append("- Efficient data loading and transformation")
+            features.append("- Statistical analysis and visualization")
+            features.append("- Data validation and quality checks")
+            features.append("- Export to multiple formats")
+        
+        # Add entity-based features
+        if context['entities']:
+            features.append("\n### 💼 Business Logic")
+            for entity in context['entities'][:5]:
                 if entity.methods:
-                    content += f"\n  - Methods: {', '.join([f'`{m}()`' for m in entity.methods[:3]])}"
-                content += "\n\n"
+                    features.append(f"- **{entity.name}**: {', '.join(entity.methods[:3])}")
         
-        # Service Classes (if detected)
-        service_classes = [s for s in self.analysis.symbols if s.type == 'class' and 'service' in s.name.lower()]
-        if service_classes:
-            content += "### Service Classes\n\n"
-            for service in service_classes[:5]:
-                content += f"- **{service.name}**: "
-                # Try to infer responsibility from name
-                if 'user' in service.name.lower():
-                    content += "User lifecycle management, authentication, and CRUD operations"
-                elif 'payment' in service.name.lower():
-                    content += "Payment creation, processing, and retrieval"
-                elif 'wallet' in service.name.lower():
-                    content += "Wallet management and fund transfers"
-                else:
-                    content += f"Business logic implementation for {service.name.replace('Service', '').lower()} operations"
-                content += "\n"
+        # Add general features
+        features.append("\n### 🔧 Technical Features")
+        features.append(f"- Modular architecture with {len(context['classes'])} reusable components")
+        features.append("- Comprehensive error handling and logging")
+        features.append("- Type hints for better code quality")
+        features.append("- Well-documented codebase")
         
-        return content if content else "Core components are organized as functions and classes providing the main application functionality."
+        return "\n".join(features)
     
-    def _generate_project_structure(self) -> str:
-        """Generate project structure description."""
-        # Get main files
-        main_files = []
-        for entry_point in self.analysis.entry_points:
-            rel_path = entry_point.relative_to(self.analysis.root_path)
-            main_files.append(str(rel_path))
+    def _generate_getting_started(self, context: dict) -> str:
+        """Generate getting started section."""
+        return f"""To get a local copy up and running, follow these simple steps.
+
+This project requires Python 3.10 or higher and uses {len(context['external_deps'])} external dependencies."""
+    
+    def _generate_prerequisites(self, context: dict) -> str:
+        """Generate prerequisites section."""
+        prereqs = ["```bash\n# Ensure you have Python 3.10+ installed\npython --version\n"]
         
-        # Add other important files based on symbols
-        important_files = set()
+        if 'torch' in context['imports']:
+            prereqs.append("\n# For GPU support (optional)\n# Install CUDA toolkit from NVIDIA")
+        
+        if any(fw[0] in ['Flask', 'Django', 'FastAPI'] for fw in context['frameworks']):
+            prereqs.append("\n# For web development\n# Ensure you have a modern web browser")
+        
+        prereqs.append("```")
+        return "".join(prereqs)
+    
+    def _generate_detailed_installation(self, context: dict) -> str:
+        """Generate detailed installation instructions."""
+        install = ["```bash\n# 1. Clone the repository\n"]
+        install.append(f"git clone https://github.com/yourusername/{self.analysis.root_path.name}.git\n")
+        install.append(f"cd {self.analysis.root_path.name}\n\n")
+        
+        install.append("# 2. Create a virtual environment\n")
+        install.append("python -m venv venv\n\n")
+        
+        install.append("# 3. Activate the virtual environment\n")
+        install.append("# On Windows:\nvenv\\Scripts\\activate\n")
+        install.append("# On macOS/Linux:\nsource venv/bin/activate\n\n")
+        
+        install.append("# 4. Install dependencies\n")
+        if context['external_deps']:
+            install.append("pip install -r requirements.txt\n\n")
+            install.append("# Or install manually:\n")
+            for dep in sorted(list(context['external_deps']))[:8]:
+                install.append(f"pip install {dep}\n")
+        else:
+            install.append("# No external dependencies required\n")
+        
+        install.append("```")
+        return "".join(install)
+    
+    def _generate_basic_usage(self, context: dict) -> str:
+        """Generate basic usage examples."""
+        if not context['entry_points']:
+            return "```bash\npython main.py\n```"
+        
+        main_entry = context['entry_points'][0]
+        rel_path = main_entry.relative_to(self.analysis.root_path)
+        
+        usage = [f"```bash\n# Run the application\npython {rel_path}\n```\n\n"]
+        
+        # Add example based on project type
+        if context['project_type'] == 'web_api':
+            usage.append("The API will be available at `http://localhost:8000`\n\n")
+            usage.append("```bash\n# Test the API\ncurl http://localhost:8000/api/health\n```")
+        elif context['project_type'] == 'ml':
+            usage.append("```python\n# Example: Train a model\nfrom train import train_model\n\n")
+            usage.append("model = train_model(data_path='data/train.csv')\n```")
+        
+        return "".join(usage)
+    
+    def _generate_advanced_usage(self, context: dict) -> str:
+        """Generate advanced usage examples."""
+        advanced = []
+        
+        # Show main classes usage
+        if context['classes']:
+            advanced.append("```python\n# Import main components\n")
+            for cls in context['classes'][:3]:
+                advanced.append(f"from {cls.file_path.stem} import {cls.name}\n")
+            advanced.append("\n# Initialize and use\n")
+            if context['classes']:
+                cls = context['classes'][0]
+                advanced.append(f"{cls.name.lower()} = {cls.name}()\n")
+            advanced.append("```")
+        
+        return "".join(advanced) if advanced else "See the [API Documentation](#api-documentation) for advanced usage patterns."
+    
+    def _generate_detailed_structure(self, context: dict) -> str:
+        """Generate detailed project structure."""
+        files = set()
         for symbol in self.analysis.symbols:
             rel_path = symbol.file_path.relative_to(self.analysis.root_path)
-            important_files.add(str(rel_path))
+            files.add(str(rel_path))
         
-        structure = f"```\n{self.analysis.root_path.name}/\n"
-        for file_path in sorted(list(important_files)[:8]):  # Limit to 8 files
+        structure = [f"```\n{self.analysis.root_path.name}/\n"]
+        structure.append("├── README.md              # This file\n")
+        structure.append("├── requirements.txt       # Python dependencies\n")
+        structure.append("├── .gitignore            # Git ignore rules\n")
+        structure.append("├── LICENSE               # License file\n")
+        
+        for file_path in sorted(list(files))[:15]:
             file_name = Path(file_path).name
-            if 'main' in file_name.lower():
-                structure += f"├── {file_name}          # Application entry point and configuration\n"
+            if file_name in ['main.py', 'app.py', '__main__.py']:
+                structure.append(f"├── {file_name}          # Application entry point\n")
             elif 'model' in file_name.lower():
-                structure += f"├── {file_name}        # Domain entities and business objects\n"
+                structure.append(f"├── {file_name}        # Data models and entities\n")
             elif 'service' in file_name.lower():
-                structure += f"├── {file_name}      # Business logic and service implementations\n"
-            elif file_name == '__init__.py':
-                structure += f"└── {file_name}      # Package initialization\n"
+                structure.append(f"├── {file_name}      # Business logic layer\n")
+            elif 'api' in file_name.lower() or 'route' in file_name.lower():
+                structure.append(f"├── {file_name}         # API endpoints\n")
+            elif 'config' in file_name.lower():
+                structure.append(f"├── {file_name}      # Configuration management\n")
+            elif 'util' in file_name.lower():
+                structure.append(f"├── {file_name}        # Utility functions\n")
+            elif 'test' in file_name.lower():
+                structure.append(f"├── {file_name}        # Test suite\n")
             else:
-                structure += f"├── {file_name}\n"
-        structure += "```"
+                structure.append(f"├── {file_name}\n")
         
-        return structure
+        if len(files) > 15:
+            structure.append(f"└── ... and {len(files) - 15} more files\n")
+        
+        structure.append("```")
+        return "".join(structure)
     
-    def _generate_run_instructions(self) -> str:
-        """Generate run instructions based on entry points."""
-        if self.analysis.entry_points:
-            main_entry = self.analysis.entry_points[0]
-            rel_path = main_entry.relative_to(self.analysis.root_path)
-            
-            if str(rel_path) == 'main.py':
-                return """Execute the application using:
-
-```bash
-python main.py
-```
-
-The application will initialize the configuration, set up database connections, and start the web server."""
-            else:
-                return f"""Execute the application using:
-
-```bash
-python {rel_path}
-```
-
-This will start the main application process."""
+    def _generate_detailed_architecture(self, context: dict) -> str:
+        """Generate detailed architecture description."""
+        arch = ["### System Architecture\n\n"]
+        
+        if context['project_type'] == 'web_api':
+            arch.append("```\nClient → API Layer → Business Logic → Data Layer → Database\n```\n\n")
+        elif context['project_type'] == 'ml':
+            arch.append("```\nData Input → Preprocessing → Model → Inference → Output\n```\n\n")
         else:
-            return "Please refer to the project documentation for specific run instructions."
+            arch.append("```\nInput → Processing → Business Logic → Output\n```\n\n")
+        
+        arch.append("### Components\n\n")
+        arch.append(f"- **{len(context['classes'])} Classes**: Object-oriented components\n")
+        arch.append(f"- **{len(context['functions'])} Functions**: Functional utilities\n")
+        arch.append(f"- **{len(self.analysis.call_relations)} Interactions**: Component relationships\n")
+        
+        if context['flows']:
+            arch.append("\n### Execution Flows\n\n")
+            for flow in context['flows'][:3]:
+                arch.append(f"**{flow.name}**: {flow.description}\n\n")
+        
+        return "".join(arch)
     
-    def _generate_artifacts_description(self) -> str:
-        """Generate description of analysis artifacts."""
-        return """The following analysis artifacts provide insights into the codebase structure:
+    def _generate_api_docs(self, context: dict) -> str:
+        """Generate API documentation section."""
+        if not context['classes']:
+            return "API documentation is available in the source code docstrings."
+        
+        docs = ["### Main Classes\n\n"]
+        for cls in context['classes'][:5]:
+            docs.append(f"#### `{cls.name}`\n\n")
+            if cls.docstring:
+                docs.append(f"{cls.docstring.split(chr(10))[0]}\n\n")
+            
+            # Get methods from entities
+            entity = next((e for e in context['entities'] if e.name == cls.name), None)
+            if entity and entity.methods:
+                docs.append("**Methods:**\n")
+                for method in entity.methods[:5]:
+                    docs.append(f"- `{method}()`\n")
+                docs.append("\n")
+        
+        return "".join(docs)
+    
+    def _generate_configuration(self, context: dict) -> str:
+        """Generate configuration section."""
+        config = ["Configuration can be managed through:\n\n"]
+        config.append("- Environment variables\n")
+        config.append("- Configuration files\n")
+        config.append("- Command-line arguments\n\n")
+        
+        config.append("```bash\n# Example environment variables\n")
+        if context['project_type'] == 'web_api':
+            config.append("export API_HOST=0.0.0.0\n")
+            config.append("export API_PORT=8000\n")
+            config.append("export DEBUG=False\n")
+        else:
+            config.append("export DEBUG=False\n")
+            config.append("export LOG_LEVEL=INFO\n")
+        config.append("```")
+        
+        return "".join(config)
+    
+    def _generate_dev_setup(self, context: dict) -> str:
+        """Generate development setup instructions."""
+        setup = ["```bash\n# Install development dependencies\n"]
+        setup.append("pip install -e .[dev]\n\n")
+        setup.append("# Install pre-commit hooks\n")
+        setup.append("pre-commit install\n")
+        setup.append("```")
+        return "".join(setup)
+    
+    def _generate_testing_info(self, context: dict) -> str:
+        """Generate testing information."""
+        return """```bash
+# Run all tests
+pytest
 
-- **callgraph.html**: Interactive visualization showing function call relationships and execution flow from main entry points through service layers
-- **report.html**: Comprehensive codebase analysis including metrics, complexity scores, and architectural overview
-- **architecture.md**: Detailed breakdown of system components, domain entities, and execution flows
-- **flows.md**: Documentation of identified execution paths including startup flow and business operations
-- **ai-context.md**: Semantic understanding of the codebase optimized for AI-assisted development and maintenance"""
+# Run with coverage
+pytest --cov=. --cov-report=html
+
+# Run specific test file
+pytest tests/test_module.py
+```"""
     
-    def _generate_development_notes(self) -> str:
-        """Generate development notes based on code patterns."""
-        notes = []
-        
-        # Check for common patterns
-        if self._has_service_pattern():
-            notes.append("**Service Layer Pattern**: Business logic is encapsulated in dedicated service classes rather than being embedded in domain models")
-        
-        if self._has_dependency_injection():
-            notes.append("**Dependency Injection**: Services are injected into components for better testability and modularity")
-        
-        if self._uses_dataclasses():
-            notes.append("**Domain-Driven Design**: Core business concepts are modeled as first-class entities with their own behaviors")
-        
-        # Add language-specific notes
-        if 'Python' in self.analysis.languages:
-            notes.append("The system uses Python's `dataclass` decorator for clean domain modeling and leverages appropriate types for data handling")
-        
-        # Add architectural notes
-        if len(self.analysis.execution_flows) > 2:
-            notes.append(f"Key data flows include: {', '.join([flow.name.replace('_', ' ') for flow in self.analysis.execution_flows[:3]])}")
-        
-        content = "The application implements several key design patterns:\n\n"
-        for note in notes:
-            content += f"- {note}\n"
-        
-        return content
+    def _generate_code_style(self, context: dict) -> str:
+        """Generate code style information."""
+        style = ["This project follows PEP 8 style guidelines.\n\n"]
+        style.append("```bash\n# Format code\nblack .\n\n")
+        style.append("# Sort imports\nisort .\n\n")
+        style.append("# Type checking\nmypy .\n")
+        style.append("```")
+        return "".join(style)
     
-    def _generate_future_improvements(self) -> str:
-        """Generate realistic future improvements."""
-        improvements = []
-        
-        # Based on domain entities
-        if any('payment' in entity.name.lower() for entity in self.analysis.domain_entities):
-            improvements.append("**Event-Driven Architecture**: Implement domain events for payment processing and wallet transactions to enable better audit trails and integration with external systems")
-        
-        # Based on architecture
-        if self._has_service_pattern():
-            improvements.append("**API Layer**: Add REST API endpoints with proper authentication and authorization to expose the service functionality to external clients")
-        
-        # Generic improvements
-        improvements.append("**Persistent Storage**: Integrate with a proper database system (PostgreSQL/MySQL) replacing any in-memory data structures with persistent storage and transaction support")
-        
-        content = ""
-        for i, improvement in enumerate(improvements, 1):
-            content += f"{i}. {improvement}\n\n"
-        
-        return content.rstrip()
+    def _generate_deployment_info(self, context: dict) -> str:
+        """Generate deployment information."""
+        if context['project_type'] == 'web_api':
+            return """### Docker Deployment
+
+```bash
+# Build Docker image
+docker build -t app-name .
+
+# Run container
+docker run -p 8000:8000 app-name
+```
+
+### Cloud Deployment
+
+This application can be deployed to:
+- AWS (EC2, ECS, Lambda)
+- Google Cloud Platform
+- Azure
+- Heroku"""
+        else:
+            return """This application can be packaged and distributed using:
+
+```bash
+# Build distribution
+python -m build
+
+# Install from wheel
+pip install dist/*.whl
+```"""
     
-    def _has_service_pattern(self) -> bool:
-        """Check if the codebase uses service pattern."""
-        return any('service' in symbol.name.lower() for symbol in self.analysis.symbols if symbol.type == 'class')
-    
-    def _has_dependency_injection(self) -> bool:
-        """Check if the codebase uses dependency injection."""
-        # Look for constructor parameters that are classes
-        for symbol in self.analysis.symbols:
-            if symbol.type == 'method' and symbol.name.endswith('.__init__') and len(symbol.parameters) > 2:
-                return True
-        return False
-    
-    def _uses_dataclasses(self) -> bool:
-        """Check if the codebase uses dataclasses."""
-        return any('dataclass' in symbol.decorators for symbol in self.analysis.symbols if symbol.decorators)
-    
-    def _get_primary_language(self) -> str:
-        """Get the primary programming language."""
-        if self.analysis.languages:
-            return list(self.analysis.languages)[0]
-        return "Python"
+    def _generate_acknowledgments(self, context: dict) -> str:
+        """Generate acknowledgments section."""
+        acks = []
+        for framework, _ in context['frameworks']:
+            acks.append(f"- [{framework}](https://pypi.org/) - Core framework")
+        
+        if not acks:
+            acks.append("- Python Community - For excellent tools and libraries")
+        
+        return "\n".join(acks) if acks else "- Python Community - For excellent tools and libraries"
